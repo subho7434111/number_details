@@ -1,0 +1,281 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>OSINT | Number Intelligence</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
+    <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary: #3b82f6;
+            --accent: #06b6d4;
+            --bg-dark: #0f172a;
+        }
+        body {
+            font-family: 'Inter', sans-serif;
+            background-color: var(--bg-dark);
+            color: #f8fafc;
+            overflow-x: hidden;
+            margin: 0;
+        }
+        h1, h2, button { font-family: 'Poppins', sans-serif; }
+
+        /* Premium Mesh Gradient Background */
+        .mesh-bg {
+            position: fixed;
+            top: 0; left: 0; width: 100%; height: 100%;
+            z-index: -1;
+            background:
+                radial-gradient(at 0% 0%, hsla(217,100%,50%,0.15) 0px, transparent 50%),
+                radial-gradient(at 100% 0%, hsla(180,100%,50%,0.1) 0px, transparent 50%),
+                radial-gradient(at 100% 100%, hsla(280,100%,50%,0.1) 0px, transparent 50%),
+                radial-gradient(at 0% 100%, hsla(200,100%,50%,0.15) 0px, transparent 50%);
+            animation: mesh-flow 20s ease-in-out infinite alternate;
+        }
+        @keyframes mesh-flow {
+            0% { transform: scale(1); }
+            100% { transform: scale(1.1); }
+        }
+
+        /* Glassmorphism Evolved */
+        .premium-glass {
+            background: rgba(30, 41, 59, 0.7);
+            backdrop-filter: blur(20px);
+            -webkit-backdrop-filter: blur(20px);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            box-shadow: 0 8px 32px 0 rgba(0, 0, 0, 0.4);
+        }
+
+        /* Input Field Styling */
+        .glass-input {
+            background: rgba(15, 23, 42, 0.6);
+            border: 1px solid rgba(255, 255, 255, 0.1);
+            color: white;
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .glass-input:focus {
+            border-color: var(--primary);
+            box-shadow: 0 0 15px rgba(59, 130, 246, 0.3);
+            outline: none;
+            background: rgba(15, 23, 42, 0.8);
+        }
+
+        /* Animations */
+        .reveal { animation: revealUp 0.8s cubic-bezier(0.16, 1, 0.3, 1) forwards; opacity: 0; }
+        @keyframes revealUp {
+            from { transform: translateY(30px); opacity: 0; }
+            to { transform: translateY(0); opacity: 1; }
+        }
+        .stagger-1 { animation-delay: 0.1s; }
+        .stagger-2 { animation-delay: 0.2s; }
+        .stagger-3 { animation-delay: 0.3s; }
+        .stagger-4 { animation-delay: 0.4s; }
+
+        .loader {
+            border: 3px solid rgba(59, 130, 246, 0.1);
+            border-top: 3px solid var(--primary);
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+        }
+        @keyframes spin { 0% { transform: rotate(0deg); } 100% { transform: rotate(360deg); } }
+
+        /* Data Item Styling */
+        .data-card {
+            background: rgba(255, 255, 255, 0.03);
+            border-radius: 12px;
+            padding: 1rem;
+            border: 1px solid rgba(255, 255, 255, 0.05);
+            transition: transform 0.2s ease;
+        }
+        .data-card:hover { transform: translateY(-2px); background: rgba(255, 255, 255, 0.05); }
+    </style>
+</head>
+<body class="min-h-screen flex flex-col items-center py-12 px-6">
+    <div class="mesh-bg"></div>
+
+    <!-- Header Section -->
+    <header class="text-center mb-12 reveal stagger-1">
+        <div class="inline-block p-2 px-4 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-400 text-xs font-bold uppercase tracking-widest mb-4">
+            Security & Intelligence
+        </div>
+        <h1 class="text-5xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-cyan-400 mb-4">
+            Number Intelligence
+        </h1>
+        <p class="text-gray-400 max-w-lg mx-auto leading-relaxed">
+            Uncover digital footprints and ownership details associated with any mobile number using advanced OSINT techniques.
+        </p>
+    </header>
+
+    <!-- Search Section -->
+    <main class="w-full max-w-xl reveal stagger-2">
+        <div class="premium-glass p-8 rounded-3xl mb-10">
+            <div class="flex flex-col sm:flex-row gap-4">
+                <div class="relative flex-grow">
+                    <i class="fas fa-phone-alt absolute left-4 top-1/2 -translate-y-1/2 text-gray-500"></i>
+                    <input type="number" id="mobileInput" placeholder="Enter Mobile Number"
+                        class="w-full pl-12 pr-4 py-4 glass-input rounded-2xl text-lg placeholder-gray-600 font-medium"
+                        onkeydown="if(event.key==='Enter') searchNumber()">
+                </div>
+                <button onclick="searchNumber()"
+                    class="bg-blue-600 hover:bg-blue-500 text-white px-8 py-4 rounded-2xl font-bold shadow-lg shadow-blue-900/20 transition-all hover:scale-105 active:scale-95 whitespace-nowrap">
+                    Search Now
+                </button>
+            </div>
+        </div>
+
+        <!-- Loading View -->
+        <div id="loading" class="hidden flex flex-col items-center py-10">
+            <div class="loader mb-4"></div>
+            <p class="text-blue-400 font-medium animate-pulse">Scanning database...</p>
+        </div>
+
+        <!-- Result View -->
+        <div id="resultContainer" class="hidden reveal">
+            <div class="premium-glass rounded-3xl overflow-hidden border border-white/5">
+                <div class="bg-gradient-to-r from-blue-600 to-cyan-600 p-6 text-white flex justify-between items-center">
+                    <div>
+                        <h2 class="text-2xl font-bold tracking-tight">Intelligence Report</h2>
+                        <p class="text-xs text-white/70 mt-1 uppercase tracking-widest" id="resTimestamp"></p>
+                    </div>
+                    <span id="resultCount" class="bg-black/20 backdrop-blur-md px-4 py-2 rounded-xl text-sm font-bold border border-white/10">1 Record Found</span>
+                </div>
+
+                <div class="p-8 grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="data-card flex items-center col-span-1 md:col-span-2">
+                        <div class="w-12 h-12 bg-blue-500/20 rounded-xl flex items-center justify-center mr-4">
+                            <i class="fas fa-user text-blue-400 text-xl"></i>
+                        </div>
+                        <div>
+                            <p class="text-[10px] text-gray-500 uppercase font-black tracking-widest mb-1">Full Identity</p>
+                            <p id="resName" class="text-xl font-semibold text-white">---</p>
+                        </div>
+                    </div>
+
+                    <div class="data-card flex items-center">
+                        <div class="w-10 h-10 bg-green-500/20 rounded-lg flex items-center justify-center mr-3">
+                            <i class="fas fa-mobile-alt text-green-400"></i>
+                        </div>
+                        <div>
+                            <p class="text-[9px] text-gray-500 uppercase font-black tracking-widest">Mobile Number</p>
+                            <p id="resMobile" class="text-white font-medium">---</p>
+                        </div>
+                    </div>
+
+                    <div class="data-card flex items-center">
+                        <div class="w-10 h-10 bg-purple-500/20 rounded-lg flex items-center justify-center mr-3">
+                            <i class="fas fa-fingerprint text-purple-400"></i>
+                        </div>
+                        <div>
+                            <p class="text-[9px] text-gray-500 uppercase font-black tracking-widest">Aadhar ID</p>
+                            <p id="resAadhar" class="text-white font-medium">---</p>
+                        </div>
+                    </div>
+
+                    <div class="data-card flex items-center">
+                        <div class="w-10 h-10 bg-orange-500/20 rounded-lg flex items-center justify-center mr-3">
+                            <i class="fas fa-sitemap text-orange-400"></i>
+                        </div>
+                        <div>
+                            <p class="text-[9px] text-gray-500 uppercase font-black tracking-widest">Parent Name</p>
+                            <p id="resFname" class="text-white font-medium">---</p>
+                        </div>
+                    </div>
+
+                    <div class="data-card flex items-center">
+                        <div class="w-10 h-10 bg-pink-500/20 rounded-lg flex items-center justify-center mr-3">
+                            <i class="fas fa-map-marked-alt text-pink-400"></i>
+                        </div>
+                        <div>
+                            <p class="text-[9px] text-gray-500 uppercase font-black tracking-widest">Region</p>
+                            <p id="resCircle" class="text-white font-medium">---</p>
+                        </div>
+                    </div>
+
+                    <div class="data-card flex items-start col-span-1 md:col-span-2">
+                        <div class="w-10 h-10 bg-red-500/20 rounded-lg flex items-center justify-center mr-3 shrink-0">
+                            <i class="fas fa-location-dot text-red-400"></i>
+                        </div>
+                        <div>
+                            <p class="text-[9px] text-gray-500 uppercase font-black tracking-widest">Registered Address</p>
+                            <p id="resAddress" class="text-white leading-snug">---</p>
+                        </div>
+                    </div>
+                </div>
+
+                <div class="px-8 py-5 bg-black/30 flex justify-center">
+                   <p class="text-xs text-gray-500 italic"><i class="fas fa-shield-alt mr-1"></i> Data sourced via verified Intelligence Shards</p>
+                </div>
+            </div>
+        </div>
+
+        <!-- Error State -->
+        <div id="errorBox" class="hidden reveal mt-6 p-6 rounded-2xl bg-red-500/10 border border-red-500/20 flex items-center">
+            <i class="fas fa-exclamation-triangle text-red-500 text-2xl mr-4"></i>
+            <div>
+                <h4 class="text-red-500 font-bold uppercase text-xs tracking-widest mb-1">Search Failed</h4>
+                <p id="errorMsg" class="text-red-200 text-sm">Target number not found in current shards.</p>
+            </div>
+        </div>
+    </main>
+
+    <footer class="mt-auto py-10 reveal stagger-4 text-center">
+        <p class="text-gray-600 text-[10px] font-bold uppercase tracking-[0.3em] mb-2">
+            &copy; 2026 Intelligence Network | Internal Access Only
+        </p>
+        <p class="text-blue-500/50 text-[12px] font-medium tracking-widest">
+            Developed by <span class="text-blue-400">Techno Subho</span>
+        </p>
+    </footer>
+
+    <script>
+        async function searchNumber() {
+            const mobileInput = document.getElementById('mobileInput');
+            const mobile = mobileInput.value;
+            const loading = document.getElementById('loading');
+            const resultContainer = document.getElementById('resultContainer');
+            const errorBox = document.getElementById('errorBox');
+
+            if (!mobile || mobile.length < 10) {
+                mobileInput.classList.add('ring-2', 'ring-red-500/50');
+                setTimeout(() => mobileInput.classList.remove('ring-2', 'ring-red-500/50'), 2000);
+                return;
+            }
+
+            // UI State Reset
+            loading.classList.remove('hidden');
+            resultContainer.classList.add('hidden');
+            errorBox.classList.add('hidden');
+
+            try {
+                const response = await fetch(`https://sarkariupdate.online/osint/APIX.php?api=num_api&q=${mobile}`);
+                const data = await response.json();
+
+                if (data.status === 'success' && data.data) {
+                    const info = data.data;
+                    document.getElementById('resName').innerText = info.name || 'Not Recorded';
+                    document.getElementById('resMobile').innerText = info.mobile || mobile;
+                    document.getElementById('resFname').innerText = info.fname || 'N/A';
+                    document.getElementById('resAadhar').innerText = info.aadhar || 'N/A';
+                    document.getElementById('resAddress').innerText = (info.address || 'N/A').replace(/!/g, ', ');
+                    document.getElementById('resCircle').innerText = info.circle || 'N/A';
+                    document.getElementById('resultCount').innerText = `${data.count} Record Found`;
+                    document.getElementById('resTimestamp').innerText = new Date().toLocaleTimeString();
+
+                    loading.classList.add('hidden');
+                    resultContainer.classList.remove('hidden');
+                } else {
+                    throw new Error('No identity matches found in digital shards.');
+                }
+            } catch (error) {
+                loading.classList.add('hidden');
+                document.getElementById('errorMsg').innerText = error.message;
+                errorBox.classList.remove('hidden');
+            }
+        }
+    </script>
+</body>
+</html>
