@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>OSINT | Number Intelligence</title>
+    <title>OSINT | Multi-Intelligence Dashboard</title>
     <script src="https://cdn.tailwindcss.com"></script>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.4.0/css/all.min.css">
     <link href="https://fonts.googleapis.com/css2?family=Poppins:wght@300;400;600;700&family=Inter:wght@300;400;500&display=swap" rel="stylesheet">
@@ -68,10 +68,15 @@
             from { transform: translateY(30px); opacity: 0; }
             to { transform: translateY(0); opacity: 1; }
         }
-        .stagger-1 { animation-delay: 0.1s; }
-        .stagger-2 { animation-delay: 0.2s; }
-        .stagger-3 { animation-delay: 0.3s; }
-        .stagger-4 { animation-delay: 0.4s; }
+
+        .tab-btn {
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1);
+        }
+        .tab-btn.active {
+            background: rgba(59, 130, 246, 0.15);
+            border-color: rgba(59, 130, 246, 0.4);
+            color: #60a5fa;
+        }
 
         .loader {
             border: 3px solid rgba(59, 130, 246, 0.1);
@@ -98,31 +103,42 @@
     <div class="mesh-bg"></div>
 
     <!-- Header Section -->
-    <header class="text-center mb-12 reveal stagger-1">
+    <header class="text-center mb-10 reveal">
         <div class="inline-block p-2 px-4 rounded-full bg-blue-500/10 border border-blue-500/20 text-blue-400 text-xs font-bold uppercase tracking-widest mb-4">
-            Security & Intelligence
+            Security & Intelligence Platform
         </div>
         <h1 class="text-5xl font-bold bg-clip-text text-transparent bg-gradient-to-r from-blue-400 to-cyan-400 mb-4">
-            Number Intelligence
+            OSINT Intelligence Dashboard
         </h1>
-        <p class="text-gray-400 max-w-lg mx-auto leading-relaxed">
-            Uncover digital footprints and ownership details associated with any mobile number using advanced OSINT techniques.
+        <p class="text-gray-400 max-w-lg mx-auto leading-relaxed text-sm">
+            Access secure digital intelligence shards across multiple records from a singular premium dashboard.
         </p>
     </header>
 
-    <!-- Search Section -->
-    <main class="w-full max-w-xl reveal stagger-2">
-        <div class="premium-glass p-8 rounded-3xl mb-10">
-            <div class="flex flex-col sm:flex-row gap-4">
+    <!-- Main Content Container -->
+    <main class="w-full max-w-xl reveal">
+        <!-- Mode Tabs -->
+        <div class="grid grid-cols-2 gap-2 mb-4 p-1.5 premium-glass rounded-2xl">
+            <button onclick="switchMode('number')" id="tab-number" class="tab-btn active py-3 text-sm font-semibold rounded-xl border border-transparent flex items-center justify-center gap-2">
+                <i class="fas fa-phone-alt"></i> Mobile Number
+            </button>
+            <button onclick="switchMode('pan')" id="tab-pan" class="tab-btn py-3 text-sm font-semibold rounded-xl border border-transparent flex items-center justify-center gap-2 text-gray-400 hover:text-white">
+                <i class="fas fa-id-card"></i> PAN Card
+            </button>
+        </div>
+
+        <!-- Search Card -->
+        <div class="premium-glass p-6 rounded-3xl mb-8">
+            <div class="flex flex-col sm:flex-row gap-3">
                 <div class="relative flex-grow">
-                    <i class="fas fa-phone-alt absolute left-4 top-1/2 -translate-y-1/2 text-gray-500"></i>
-                    <input type="number" id="mobileInput" placeholder="Enter Mobile Number"
-                        class="w-full pl-12 pr-4 py-4 glass-input rounded-2xl text-lg placeholder-gray-600 font-medium"
-                        onkeydown="if(event.key==='Enter') searchNumber()">
+                    <i id="input-icon" class="fas fa-phone-alt absolute left-4 top-1/2 -translate-y-1/2 text-gray-500"></i>
+                    <input type="text" id="targetInput" placeholder="Enter Mobile Number"
+                        class="w-full pl-12 pr-4 py-4 glass-input rounded-2xl text-lg placeholder-gray-600 font-medium uppercase-target"
+                        onkeydown="if(event.key==='Enter') executeSearch()">
                 </div>
-                <button onclick="searchNumber()"
+                <button onclick="executeSearch()"
                     class="bg-blue-600 hover:bg-blue-500 text-white px-8 py-4 rounded-2xl font-bold shadow-lg shadow-blue-900/20 transition-all hover:scale-105 active:scale-95 whitespace-nowrap">
-                    Search Now
+                    Search
                 </button>
             </div>
         </div>
@@ -130,84 +146,145 @@
         <!-- Loading View -->
         <div id="loading" class="hidden flex flex-col items-center py-10">
             <div class="loader mb-4"></div>
-            <p class="text-blue-400 font-medium animate-pulse">Scanning database...</p>
+            <p class="text-blue-400 font-medium animate-pulse">Scanning target matrix...</p>
         </div>
 
-        <!-- Result View -->
-        <div id="resultContainer" class="hidden reveal">
+        <!-- Number Intelligence Result View -->
+        <div id="numberResultContainer" class="hidden reveal">
             <div class="premium-glass rounded-3xl overflow-hidden border border-white/5">
                 <div class="bg-gradient-to-r from-blue-600 to-cyan-600 p-6 text-white flex justify-between items-center">
                     <div>
-                        <h2 class="text-2xl font-bold tracking-tight">Intelligence Report</h2>
-                        <p class="text-xs text-white/70 mt-1 uppercase tracking-widest" id="resTimestamp"></p>
+                        <h2 class="text-2xl font-bold tracking-tight">Identity Report</h2>
+                        <p class="text-xs text-white/70 mt-1 uppercase tracking-widest identity-time"></p>
                     </div>
-                    <span id="resultCount" class="bg-black/20 backdrop-blur-md px-4 py-2 rounded-xl text-sm font-bold border border-white/10">1 Record Found</span>
+                    <span id="numRecordCount" class="bg-black/20 backdrop-blur-md px-4 py-2 rounded-xl text-sm font-bold border border-white/10">1 Record</span>
                 </div>
 
-                <div class="p-8 grid grid-cols-1 md:grid-cols-2 gap-4">
+                <div class="p-6 grid grid-cols-1 md:grid-cols-2 gap-4">
                     <div class="data-card flex items-center col-span-1 md:col-span-2">
                         <div class="w-12 h-12 bg-blue-500/20 rounded-xl flex items-center justify-center mr-4">
                             <i class="fas fa-user text-blue-400 text-xl"></i>
                         </div>
                         <div>
                             <p class="text-[10px] text-gray-500 uppercase font-black tracking-widest mb-1">Full Identity</p>
-                            <p id="resName" class="text-xl font-semibold text-white">---</p>
+                            <p id="resName" class="text-lg font-semibold text-white">---</p>
                         </div>
                     </div>
-
                     <div class="data-card flex items-center">
                         <div class="w-10 h-10 bg-green-500/20 rounded-lg flex items-center justify-center mr-3">
                             <i class="fas fa-mobile-alt text-green-400"></i>
                         </div>
                         <div>
-                            <p class="text-[9px] text-gray-500 uppercase font-black tracking-widest">Mobile Number</p>
-                            <p id="resMobile" class="text-white font-medium">---</p>
+                            <p class="text-[9px] text-gray-500 uppercase font-black tracking-widest">Mobile Line</p>
+                            <p id="resMobile" class="text-white text-sm font-medium">---</p>
                         </div>
                     </div>
-
                     <div class="data-card flex items-center">
                         <div class="w-10 h-10 bg-purple-500/20 rounded-lg flex items-center justify-center mr-3">
                             <i class="fas fa-fingerprint text-purple-400"></i>
                         </div>
                         <div>
                             <p class="text-[9px] text-gray-500 uppercase font-black tracking-widest">Aadhar ID</p>
-                            <p id="resAadhar" class="text-white font-medium">---</p>
+                            <p id="resAadhar" class="text-white text-sm font-medium">---</p>
                         </div>
                     </div>
-
                     <div class="data-card flex items-center">
                         <div class="w-10 h-10 bg-orange-500/20 rounded-lg flex items-center justify-center mr-3">
                             <i class="fas fa-sitemap text-orange-400"></i>
                         </div>
                         <div>
                             <p class="text-[9px] text-gray-500 uppercase font-black tracking-widest">Parent Name</p>
-                            <p id="resFname" class="text-white font-medium">---</p>
+                            <p id="resFname" class="text-white text-sm font-medium">---</p>
                         </div>
                     </div>
-
                     <div class="data-card flex items-center">
                         <div class="w-10 h-10 bg-pink-500/20 rounded-lg flex items-center justify-center mr-3">
                             <i class="fas fa-map-marked-alt text-pink-400"></i>
                         </div>
                         <div>
-                            <p class="text-[9px] text-gray-500 uppercase font-black tracking-widest">Region</p>
-                            <p id="resCircle" class="text-white font-medium">---</p>
+                            <p class="text-[9px] text-gray-500 uppercase font-black tracking-widest">Telecom Circle</p>
+                            <p id="resCircle" class="text-white text-sm font-medium">---</p>
                         </div>
                     </div>
-
                     <div class="data-card flex items-start col-span-1 md:col-span-2">
                         <div class="w-10 h-10 bg-red-500/20 rounded-lg flex items-center justify-center mr-3 shrink-0">
                             <i class="fas fa-location-dot text-red-400"></i>
                         </div>
                         <div>
-                            <p class="text-[9px] text-gray-500 uppercase font-black tracking-widest">Registered Address</p>
-                            <p id="resAddress" class="text-white leading-snug">---</p>
+                            <p class="text-[9px] text-gray-500 uppercase font-black tracking-widest">Registered Location</p>
+                            <p id="resAddress" class="text-white text-sm leading-snug">---</p>
                         </div>
                     </div>
                 </div>
+            </div>
+        </div>
 
-                <div class="px-8 py-5 bg-black/30 flex justify-center">
-                   <p class="text-xs text-gray-500 italic"><i class="fas fa-shield-alt mr-1"></i> Data sourced via verified Intelligence Shards</p>
+        <!-- PAN Intelligence Result View -->
+        <div id="panResultContainer" class="hidden reveal">
+            <div class="premium-glass rounded-3xl overflow-hidden border border-white/5">
+                <div class="bg-gradient-to-r from-emerald-600 to-teal-600 p-6 text-white flex justify-between items-center">
+                    <div>
+                        <h2 class="text-2xl font-bold tracking-tight">Taxpayer Intelligence</h2>
+                        <p class="text-xs text-white/70 mt-1 uppercase tracking-widest identity-time"></p>
+                    </div>
+                    <span class="bg-black/20 backdrop-blur-md px-4 py-2 rounded-xl text-sm font-bold border border-white/10">Active Ledger</span>
+                </div>
+
+                <div class="p-6 grid grid-cols-1 md:grid-cols-2 gap-4">
+                    <div class="data-card flex items-center col-span-1 md:col-span-2">
+                        <div class="w-12 h-12 bg-emerald-500/20 rounded-xl flex items-center justify-center mr-4">
+                            <i class="fas fa-id-card text-emerald-400 text-xl"></i>
+                        </div>
+                        <div>
+                            <p class="text-[10px] text-gray-500 uppercase font-black tracking-widest mb-1">Registered Name</p>
+                            <p id="panName" class="text-lg font-semibold text-white">---</p>
+                        </div>
+                    </div>
+                    <div class="data-card flex items-center">
+                        <div class="w-10 h-10 bg-blue-500/20 rounded-lg flex items-center justify-center mr-3">
+                            <i class="fas fa-passport text-blue-400"></i>
+                        </div>
+                        <div>
+                            <p class="text-[9px] text-gray-500 uppercase font-black tracking-widest">PAN Number</p>
+                            <p id="panNumberDisplay" class="text-white text-sm font-medium">---</p>
+                        </div>
+                    </div>
+                    <div class="data-card flex items-center">
+                        <div class="w-10 h-10 bg-purple-500/20 rounded-lg flex items-center justify-center mr-3">
+                            <i class="fas fa-user-shield text-purple-400"></i>
+                        </div>
+                        <div>
+                            <p class="text-[9px] text-gray-500 uppercase font-black tracking-widest">Status / Type</p>
+                            <p id="panStatus" class="text-white text-sm font-medium">---</p>
+                        </div>
+                    </div>
+                    <div class="data-card flex items-center">
+                        <div class="w-10 h-10 bg-orange-500/20 rounded-lg flex items-center justify-center mr-3">
+                            <i class="fas fa-calendar-alt text-orange-400"></i>
+                        </div>
+                        <div>
+                            <p class="text-[9px] text-gray-500 uppercase font-black tracking-widest">Date of Birth</p>
+                            <p id="panDob" class="text-white text-sm font-medium">---</p>
+                        </div>
+                    </div>
+                    <div class="data-card flex items-center">
+                        <div class="w-10 h-10 bg-indigo-500/20 rounded-lg flex items-center justify-center mr-3">
+                            <i class="fas fa-user-tag text-indigo-400"></i>
+                        </div>
+                        <div>
+                            <p class="text-[9px] text-gray-500 uppercase font-black tracking-widest">First Name</p>
+                            <p id="panFirstName" class="text-white text-sm font-medium">---</p>
+                        </div>
+                    </div>
+                    <div class="data-card flex items-center">
+                        <div class="w-10 h-10 bg-teal-500/20 rounded-lg flex items-center justify-center mr-3">
+                            <i class="fas fa-user-tag text-teal-400"></i>
+                        </div>
+                        <div>
+                            <p class="text-[9px] text-gray-500 uppercase font-black tracking-widest">Last Name</p>
+                            <p id="panLastName" class="text-white text-sm font-medium">---</p>
+                        </div>
+                    </div>
                 </div>
             </div>
         </div>
@@ -216,13 +293,14 @@
         <div id="errorBox" class="hidden reveal mt-6 p-6 rounded-2xl bg-red-500/10 border border-red-500/20 flex items-center">
             <i class="fas fa-exclamation-triangle text-red-500 text-2xl mr-4"></i>
             <div>
-                <h4 class="text-red-500 font-bold uppercase text-xs tracking-widest mb-1">Search Failed</h4>
-                <p id="errorMsg" class="text-red-200 text-sm">Target number not found in current shards.</p>
+                <h4 class="text-red-500 font-bold uppercase text-xs tracking-widest mb-1">Query Interrupted</h4>
+                <p id="errorMsg" class="text-red-200 text-sm">Target record footprint could not be mapped.</p>
             </div>
         </div>
     </main>
 
-    <footer class="mt-auto py-10 reveal stagger-4 text-center">
+    <!-- Updated Premium Footer -->
+    <footer class="mt-auto py-10 text-center reveal">
         <p class="text-gray-600 text-[10px] font-bold uppercase tracking-[0.3em] mb-2">
             &copy; 2026 Intelligence Network | Internal Access Only
         </p>
@@ -232,48 +310,127 @@
     </footer>
 
     <script>
-        async function searchNumber() {
-            const mobileInput = document.getElementById('mobileInput');
-            const mobile = mobileInput.value;
+        let currentMode = 'number';
+
+        function switchMode(mode) {
+            currentMode = mode;
+
+            // UI Switch Transitions
+            const tabNumber = document.getElementById('tab-number');
+            const tabPan = document.getElementById('tab-pan');
+            const targetInput = document.getElementById('targetInput');
+            const inputIcon = document.getElementById('input-icon');
+
+            // Reset Result Containers
+            document.getElementById('numberResultContainer').classList.add('hidden');
+            document.getElementById('panResultContainer').classList.add('hidden');
+            document.getElementById('errorBox').classList.add('hidden');
+            targetInput.value = '';
+
+            if (mode === 'number') {
+                tabNumber.classList.add('active');
+                tabNumber.classList.remove('text-gray-400');
+                tabPan.classList.remove('active');
+                tabPan.classList.add('text-gray-400');
+
+                targetInput.placeholder = "Enter Mobile Number";
+                inputIcon.className = "fas fa-phone-alt absolute left-4 top-1/2 -translate-y-1/2 text-gray-500";
+                targetInput.style.textTransform = "none";
+                targetInput.oninput = null; // Clear auto capitalization for number
+            } else {
+                tabPan.classList.add('active');
+                tabPan.classList.remove('text-gray-400');
+                tabNumber.classList.remove('active');
+                tabNumber.classList.add('text-gray-400');
+
+                targetInput.placeholder = "Enter PAN Number (e.g. ABCDE1234F)";
+                inputIcon.className = "fas fa-id-card absolute left-4 top-1/2 -translate-y-1/2 text-gray-500";
+                targetInput.style.textTransform = "uppercase";
+
+                // Real-time auto capitalization for PAN
+                targetInput.oninput = function() {
+                    this.value = this.value.toUpperCase();
+                };
+            }
+        }
+
+        async function executeSearch() {
+            const targetInput = document.getElementById('targetInput');
+            let queryVal = targetInput.value.trim();
             const loading = document.getElementById('loading');
-            const resultContainer = document.getElementById('resultContainer');
+            const numContainer = document.getElementById('numberResultContainer');
+            const panContainer = document.getElementById('panResultContainer');
             const errorBox = document.getElementById('errorBox');
 
-            if (!mobile || mobile.length < 10) {
-                mobileInput.classList.add('ring-2', 'ring-red-500/50');
-                setTimeout(() => mobileInput.classList.remove('ring-2', 'ring-red-500/50'), 2000);
+            if (currentMode === 'pan') {
+                queryVal = queryVal.toUpperCase();
+            }
+
+            // Simple validation
+            if (!queryVal || (currentMode === 'number' && queryVal.length < 10)) {
+                targetInput.classList.add('ring-2', 'ring-red-500/50');
+                setTimeout(() => targetInput.classList.remove('ring-2', 'ring-red-500/50'), 2000);
                 return;
             }
 
-            // UI State Reset
+            // Loading view state triggers
             loading.classList.remove('hidden');
-            resultContainer.classList.add('hidden');
+            numContainer.classList.add('hidden');
+            panContainer.classList.add('hidden');
             errorBox.classList.add('hidden');
 
             try {
-                const response = await fetch(`https://sarkariupdate.online/osint/APIX.php?api=num_api&q=${mobile}`);
+                const endpoint = currentMode === 'number'
+                    ? `https://sarkariupdate.online/osint/APIX.php?api=num_api&q=${queryVal}`
+                    : `https://sarkariupdate.online/osint/APIX.php?api=pan&q=${queryVal}`;
+
+                const response = await fetch(endpoint);
                 const data = await response.json();
 
-                if (data.status === 'success' && data.data) {
-                    const info = data.data;
-                    document.getElementById('resName').innerText = info.name || 'Not Recorded';
-                    document.getElementById('resMobile').innerText = info.mobile || mobile;
-                    document.getElementById('resFname').innerText = info.fname || 'N/A';
-                    document.getElementById('resAadhar').innerText = info.aadhar || 'N/A';
-                    document.getElementById('resAddress').innerText = (info.address || 'N/A').replace(/!/g, ', ');
-                    document.getElementById('resCircle').innerText = info.circle || 'N/A';
-                    document.getElementById('resultCount').innerText = `${data.count} Record Found`;
-                    document.getElementById('resTimestamp').innerText = new Date().toLocaleTimeString();
+                if (data.error) {
+                    throw new Error(data.error === "Upstream error 429" ? "API Rate limit hit (Error 429). Please try again shortly." : data.error);
+                }
 
-                    loading.classList.add('hidden');
-                    resultContainer.classList.remove('hidden');
+                // Injecting update timestamps
+                const timeStrings = document.querySelectorAll('.identity-time');
+                timeStrings.forEach(el => el.innerText = `Reported: ${new Date().toLocaleTimeString()}`);
+
+                if (currentMode === 'number') {
+                    if (data.status === 'success' && data.data) {
+                        const info = data.data;
+                        document.getElementById('resName').innerText = info.name || 'Not Recorded';
+                        document.getElementById('resMobile').innerText = info.mobile || queryVal;
+                        document.getElementById('resFname').innerText = info.fname || 'N/A';
+                        document.getElementById('resAadhar').innerText = info.aadhar || 'N/A';
+                        document.getElementById('resAddress').innerText = (info.address || 'N/A').replace(/!/g, ', ');
+                        document.getElementById('resCircle').innerText = info.circle || 'N/A';
+                        document.getElementById('numRecordCount').innerText = `${data.count || 1} Record Found`;
+
+                        numContainer.classList.remove('hidden');
+                    } else {
+                        throw new Error('No record footprint discovered for this mobile link.');
+                    }
                 } else {
-                    throw new Error('No identity matches found in digital shards.');
+                    // Handling PAN Response mapping dynamically
+                    if (data.data || data.meta) {
+                        const info = data.data || {};
+                        document.getElementById('panName').innerText = info.customerName || 'Not Recorded';
+                        document.getElementById('panNumberDisplay').innerText = queryVal;
+                        document.getElementById('panStatus').innerText = info.panStatus || 'N/A';
+                        document.getElementById('panDob').innerText = info.dob || 'N/A';
+                        document.getElementById('panFirstName').innerText = info.firstName || '---';
+                        document.getElementById('panLastName').innerText = info.lastName || '---';
+
+                        panContainer.classList.remove('hidden');
+                    } else {
+                        throw new Error('No asset matches found for this PAN ledger entry.');
+                    }
                 }
             } catch (error) {
-                loading.classList.add('hidden');
                 document.getElementById('errorMsg').innerText = error.message;
                 errorBox.classList.remove('hidden');
+            } finally {
+                loading.classList.add('hidden');
             }
         }
     </script>
